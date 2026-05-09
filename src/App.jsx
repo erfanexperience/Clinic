@@ -7,7 +7,12 @@ const STORAGE_KEY = 'ms-clinical-trials-v1';
 function loadData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const savedNcts = new Set(parsed.map(r => r.nctNumber).filter(Boolean));
+      const newTrials = INITIAL_DATA.filter(r => r.nctNumber && !savedNcts.has(r.nctNumber));
+      return newTrials.length > 0 ? [...parsed, ...newTrials] : parsed;
+    }
   } catch {}
   return INITIAL_DATA;
 }

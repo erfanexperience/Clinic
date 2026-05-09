@@ -280,4 +280,16 @@ export const INITIAL_DATA = [
     whyBetter: 'Targets acute demyelinating lesions with advanced MRI remyelination measurement. Repairs damage at the time it occurs — complementary to any immunotherapy. UCSF 45 min from San Jose.',
     url: 'https://clinicaltrials.gov/study/NCT06065670', contactEmail: '', contactPhone: '', notes: '',
   },
+  {
+    id: id(), trialName: 'KITE-363 Dual Anti-CD19/CD20 CAR-T — Relapsing & Progressive MS (Kite/Gilead)',
+    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'CAR-T Cell Therapy',
+    msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07304154', enrollment: '52',
+    startDate: '2026-04-10', nearestSite: 'LDS Hospital – Intermountain Health, Salt Lake City UT | Stanford (pending Dr. Lee) | Fred Hutchinson, Seattle WA',
+    keyCaveat: 'Phase 1, only 52 patients — fills fast. Autologous CAR-T requires cell harvesting. Lymphodepletion chemo required. Also covers CIDP & Myasthenia Gravis. Stanford site confirmed but awaiting Dr. Lee response.',
+    whyBetter: 'Kite/Gilead dual-target autologous CAR-T hitting both CD19 and CD20 simultaneously — deepest B cell depletion possible. Phase 1 basket trial across autoimmune neurologic diseases. Kite is the world leader in CAR-T manufacturing and safety.',
+    url: 'https://clinicaltrials.gov/study/NCT07304154',
+    contactEmail: 'medinfo@kitepharma.com',
+    contactPhone: '385-282-2751',
+    notes: '✅ Already contacted Dr. Timothy West — LDS Hospital Intermountain Health, Salt Lake City UT 84143. Also at Stanford — waiting for Dr. Lee to respond.',
+  },
 ];
