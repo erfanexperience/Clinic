@@ -325,19 +325,16 @@ body {
 
 /* ── Cells ── */
 .cell {
-  height: 38px;
-  padding: 0 10px;
+  padding: 10px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
-  vertical-align: middle;
+  vertical-align: top;
   cursor: default;
   position: relative;
 }
 
 .cell--select { cursor: pointer; }
 .cell--url { cursor: default; }
-.cell--textarea { height: 56px; vertical-align: top; padding-top: 8px; }
 .cell--editing {
   background: var(--cell-edit-bg) !important;
   box-shadow: inset 0 0 0 2px var(--cell-edit-border);
@@ -346,22 +343,19 @@ body {
 }
 
 .cell-inner {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
 }
 
 .cell-inner--clamp {
   white-space: pre-wrap;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.4;
+  word-break: break-word;
+  line-height: 1.5;
 }
 
 .cell-empty { color: #c7cdd6; font-style: italic; }
@@ -380,12 +374,13 @@ body {
 
 .cell-textarea {
   width: 100%;
+  min-height: 80px;
   border: none;
   background: transparent;
   font-size: 14px;
   font-family: var(--font);
   outline: none;
-  resize: none;
+  resize: vertical;
   color: var(--text);
   line-height: 1.5;
 }
@@ -459,7 +454,8 @@ td.col-actions {
   left: 0;
   z-index: 5;
   text-align: center;
-  padding: 0;
+  padding: 8px 0 0;
+  vertical-align: top;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
