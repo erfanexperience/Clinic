@@ -206,7 +206,7 @@ export default function App() {
   const [editCell, setEditCell] = useState(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState({ key: 'priority', dir: 'asc' });
+  const [sort, setSort] = useState({ key: 'trialName', dir: 'asc' });
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
@@ -323,7 +323,7 @@ export default function App() {
           )}
         </div>
         <div className="filter-pills">
-          {['priority', 'status', 'treatmentType', 'msTypeEligible'].map(key => {
+          {['status', 'treatmentType', 'msTypeEligible'].map(key => {
             const col = COLUMNS.find(c => c.key === key);
             return (
               <select
