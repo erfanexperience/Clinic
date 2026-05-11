@@ -5,7 +5,7 @@ import { COLUMNS, SELECT_OPTIONS, BADGE_COLORS, INITIAL_DATA } from './data';
 import './App.css';
 
 const DB_PATH = 'trials';
-const OLD_STATUSES = new Set(['Recruiting', 'Not Yet Recruiting', 'Completed', 'Suspended']);
+const OLD_STATUSES = new Set(['Recruiting', 'Not Yet Recruiting', 'Completed', 'Suspended', 'Active, not recruiting']);
 
 /* ── Migrate old status values ── */
 function migrateRows(rows) {

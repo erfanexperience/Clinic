@@ -14,7 +14,7 @@ export const COLUMNS = [
 
 export const SELECT_OPTIONS = {
   priority: ['⭐⭐⭐ Top Priority', '⭐⭐ Strong Option', '⭐ Consider'],
-  status: ['Not Contacted', 'Contacted', 'In Talks'],
+  status: ['Not Contacted', 'Contacted', 'In Talks', 'Cancelled'],
   treatmentType: ['CAR-T Cell Therapy', 'HSCT / Stem Cell', 'Regulatory T Cell', 'Remyelination', 'Allogeneic CAR-T', 'BTK Inhibitor', 'Novel Biologic', 'Neuroprotection', 'Precision Medicine'],
   msTypeEligible: ['RRMS', 'Progressive', 'Any MS', 'Refractory/Relapsing'],
   location: ['USA 🇺🇸', 'China 🇨🇳', 'Europe 🇪🇺', 'International 🌍', 'Russia 🇷🇺', 'Taiwan 🇹🇼'],
@@ -29,7 +29,8 @@ export const BADGE_COLORS = {
   status: {
     'Not Contacted': { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
     'Contacted':     { bg: '#fef9c3', color: '#854d0e', border: '#fde047' },
-    'In Talks':      { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
+    'In Talks':      { bg: '#dbeafe', color: '#1e40af', border: '#93c5fd' },
+    'Cancelled':     { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
   },
   treatmentType: {
     'CAR-T Cell Therapy':   { bg: '#ede9fe', color: '#5b21b6', border: '#c4b5fd' },
