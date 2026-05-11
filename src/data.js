@@ -292,4 +292,16 @@ export const INITIAL_DATA = [
     contactPhone: '385-282-2751',
     notes: '✅ Already contacted Dr. Timothy West — LDS Hospital Intermountain Health, Salt Lake City UT 84143. Also at Stanford — waiting for Dr. Lee to respond.',
   },
+  {
+    id: id(), trialName: 'KYV-101 Anti-CD19 CAR-T — Refractory Progressive MS (UCSF Single-Center)',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
+    msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06451159', enrollment: '10',
+    startDate: '2024-06-01', nearestSite: 'UCSF MS & Neuroinflammation Center, 1651 4th St Suite 252, San Francisco, CA 94158 (~45 min from San Jose)',
+    keyCaveat: 'Currently "Active, not recruiting" — only 10 patients, fills extremely fast. Progressive MS only; EDSS 3.0–7.0 required. Lymphodepletion chemo (cyclophosphamide + fludarabine) required. Ages 25–70.',
+    whyBetter: 'UCSF-led autologous anti-CD19 CAR-T by Kyverna Therapeutics — deepest B cell depletion for progressive MS. Same UCSF MS center as Shabnam\'s care team (Dr. Bruce Cree). 45 min from San Jose. Earlier/smaller sister trial to the multi-site KYV-101 study.',
+    url: 'https://clinicaltrials.gov/study/NCT06451159',
+    contactEmail: '',
+    contactPhone: '(415) 353-2069',
+    notes: 'UCSF Multiple Sclerosis and Neuroinflammation Center — 1651 4th St Suite 252, San Francisco, CA 94158. PI: Dr. Bruce Cree.',
+  },
 ];
