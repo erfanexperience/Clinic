@@ -316,4 +316,16 @@ export const INITIAL_DATA = [
     contactPhone: '267-759-3100 ext. 4444',
     notes: '',
   },
+  {
+    id: id(), trialName: 'Azer-cel (Azercabtagene Zapreleucel) Allogeneic CAR-T — Progressive MS (TG Therapeutics)',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'Allogeneic CAR-T',
+    msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06680037', enrollment: '32',
+    startDate: '2024-11', nearestSite: 'La Jolla, CA | Ann Arbor, MI | Cleveland & Columbus, OH | Omaha, NE | New York & Rochester, NY | Milwaukee, WI',
+    keyCaveat: 'Progressive MS only (PPMS or SPMS). Shabnam is RRMS — confirm if progressive features qualify. Must have discontinued current DMT. No prior CAR-T therapy allowed. No malignancy within 2 years. Allogeneic (off-the-shelf) — no cell harvesting needed.',
+    whyBetter: 'Off-the-shelf allogeneic anti-CD19 CAR-T by TG Therapeutics — no waiting to harvest patient\'s own cells, faster access. Phase 1 across 9 US sites with CA location (La Jolla). Targets B-cell driven progressive MS with a ready-made product. 32 patients — larger than most CAR-T trials.',
+    url: 'https://clinicaltrials.gov/study/NCT06680037',
+    contactEmail: 'clinicalsupport@tgtxinc.com',
+    contactPhone: '1-877-575-8489',
+    notes: 'TG Therapeutics Clinical Support Team.',
+  },
 ];
