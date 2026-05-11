@@ -3,13 +3,13 @@ export const COLUMNS = [
   { key: 'contactEmail',   label: 'Contact Email',   type: 'text',     width: 180 },
   { key: 'contactPhone',   label: 'Contact Phone',   type: 'text',     width: 140 },
   { key: 'notes',          label: 'Notes',           type: 'textarea', width: 240 },
+  { key: 'url',            label: 'URL',             type: 'url',      width: 200 },
   { key: 'status',         label: 'Status',          type: 'select',   width: 150 },
   { key: 'treatmentType',  label: 'Treatment Type',  type: 'select',   width: 160 },
   { key: 'msTypeEligible', label: 'MS Type',         type: 'select',   width: 150 },
   { key: 'nctNumber',      label: 'NCT Number',      type: 'text',     width: 130 },
   { key: 'nearestSite',    label: 'Nearest Site',    type: 'text',     width: 280 },
   { key: 'keyCaveat',      label: 'Key Caveat',      type: 'textarea', width: 300 },
-  { key: 'url',            label: 'URL',             type: 'url',      width: 200 },
 ];
 
 export const SELECT_OPTIONS = {
