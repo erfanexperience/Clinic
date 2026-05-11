@@ -12,6 +12,32 @@ function migrateRows(rows) {
   return rows.map(r => OLD_STATUSES.has(r.status) ? { ...r, status: 'Not Contacted' } : r);
 }
 
+/* ── Merge INITIAL_DATA fields into Firebase rows ──
+   For each saved row, if INITIAL_DATA has a newer non-empty value for a field
+   that is currently blank in Firebase, fill it in. Preserves all user edits. ── */
+const INITIAL_MAP = Object.fromEntries(INITIAL_DATA.map(r => [r.nctNumber, r]));
+// Fields the user controls — never overwrite these from INITIAL_DATA
+const USER_FIELDS = new Set(['status', 'notes', 'contactEmail', 'contactPhone']);
+
+function mergeWithInitial(firebaseRows) {
+  return firebaseRows.map(row => {
+    const seed = INITIAL_MAP[row.nctNumber];
+    if (!seed) return row;
+    const merged = { ...row };
+    for (const key of Object.keys(seed)) {
+      if (key === 'id') continue;
+      // For non-user fields: overwrite if INITIAL_DATA has a value (keeps code updates live)
+      // For user fields: only fill if currently blank (preserve edits)
+      if (USER_FIELDS.has(key)) {
+        if (!merged[key]) merged[key] = seed[key];
+      } else {
+        if (seed[key]) merged[key] = seed[key];
+      }
+    }
+    return merged;
+  });
+}
+
 /* ── Write all rows to Firebase ── */
 function saveToFirebase(rows) {
   const obj = {};
@@ -330,14 +356,16 @@ export default function App() {
         saveToFirebase(INITIAL_DATA);
         setRows(INITIAL_DATA);
       } else {
-        // Convert object back to array, migrate old statuses
+        // Convert object → array, migrate old statuses, merge latest INITIAL_DATA fields
         const arr = migrateRows(Object.values(data));
-        // Merge any new trials from INITIAL_DATA not yet in Firebase
-        const savedNcts = new Set(arr.map(r => r.nctNumber).filter(Boolean));
+        const withUpdates = mergeWithInitial(arr);
+        // Append any brand-new trials not yet in Firebase
+        const savedNcts = new Set(withUpdates.map(r => r.nctNumber).filter(Boolean));
         const newTrials = INITIAL_DATA.filter(r => r.nctNumber && !savedNcts.has(r.nctNumber));
-        const merged = newTrials.length > 0 ? [...arr, ...newTrials] : arr;
-        if (newTrials.length > 0) saveToFirebase(merged);
-        setRows(merged);
+        const final = newTrials.length > 0 ? [...withUpdates, ...newTrials] : withUpdates;
+        // Always push merged result back so Firebase stays current
+        saveToFirebase(final);
+        setRows(final);
       }
       setLoading(false);
     });
