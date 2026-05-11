@@ -104,9 +104,7 @@ function MobileEditModal({ row, col, onSave, onClose }) {
                 <button key={opt}
                   className={`mobile-select-opt ${draft === opt ? 'mobile-select-opt--active' : ''}`}
                   onClick={() => { onSave(key, opt); onClose(); }}>
-                  {BADGE_COLORS[key]?.[opt]
-                    ? <Badge value={opt} type={key} />
-                    : opt}
+                  {BADGE_COLORS[key]?.[opt] ? <Badge value={opt} type={key} /> : opt}
                 </button>
               ))}
               <button className="mobile-select-opt mobile-select-opt--clear"
@@ -141,14 +139,83 @@ function MobileEditModal({ row, col, onSave, onClose }) {
   );
 }
 
+/* ── Mobile accordion list ── */
+function MobileList({ rows, onEdit, onDelete }) {
+  const [expandedId, setExpandedId] = useState(null);
+
+  return (
+    <div className="mobile-list">
+      {rows.map((row, idx) => {
+        const isOpen = expandedId === row.id;
+        return (
+          <div key={row.id} className={`mobile-card ${isOpen ? 'mobile-card--open' : ''}`}>
+            {/* ── Header row (always visible) ── */}
+            <button
+              className="mobile-card-header"
+              onClick={() => setExpandedId(isOpen ? null : row.id)}
+            >
+              <span className="mobile-card-num">{idx + 1}</span>
+              <span className="mobile-card-name">{row.trialName || <em>Untitled Trial</em>}</span>
+              <span className="mobile-card-status">
+                {row.status ? <Badge value={row.status} type="status" /> : null}
+              </span>
+              <span className="mobile-card-chevron">{isOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {/* ── Expanded detail panel ── */}
+            {isOpen && (
+              <div className="mobile-card-body">
+                {COLUMNS.filter(c => c.key !== 'trialName').map(col => {
+                  const val = row[col.key] ?? '';
+                  return (
+                    <div key={col.key} className="mobile-field"
+                      onClick={() => onEdit(row, col)}>
+                      <span className="mobile-field-label">{col.label}</span>
+                      <span className="mobile-field-value">
+                        {col.type === 'select'
+                          ? <Badge value={val} type={col.key} />
+                          : col.type === 'url'
+                            ? val
+                              ? <a href={val} target="_blank" rel="noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="mobile-field-link">🔗 Open Trial</a>
+                              : <span className="mobile-field-empty">—</span>
+                            : val || <span className="mobile-field-empty">—</span>
+                        }
+                      </span>
+                      <span className="mobile-field-edit">✏️</span>
+                    </div>
+                  );
+                })}
+
+                {/* Trial name field (editable too) */}
+                <div className="mobile-field mobile-field--name"
+                  onClick={() => onEdit(row, COLUMNS.find(c => c.key === 'trialName'))}>
+                  <span className="mobile-field-label">Trial Name</span>
+                  <span className="mobile-field-value">{row.trialName || <span className="mobile-field-empty">—</span>}</span>
+                  <span className="mobile-field-edit">✏️</span>
+                </div>
+
+                <button className="mobile-delete-btn"
+                  onClick={e => { e.stopPropagation(); onDelete(row.id); }}>
+                  🗑 Delete this trial
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Desktop inline Cell ── */
-function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, onMobileTap, isFrozen }) {
+function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav }) {
   const { key, type } = col;
   const value = row[key] ?? '';
   const ref = useRef(null);
   const [draft, setDraft] = useState(value);
   const [showSelect, setShowSelect] = useState(false);
-  const frozenClass = isFrozen ? 'cell--frozen' : '';
 
   useEffect(() => {
     if (isEditing && ref.current && type !== 'select') {
@@ -159,19 +226,18 @@ function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, 
   useEffect(() => { setDraft(value); }, [value]);
 
   const commit = useCallback(() => onCommit(key, draft), [key, draft, onCommit]);
-  const tap = isMobile ? onMobileTap : onStartEdit;
 
   /* Select */
   if (type === 'select') {
     return (
-      <td className={`cell cell--select ${frozenClass} ${isEditing && !isMobile ? 'cell--editing' : ''}`}
+      <td className={`cell cell--select ${isEditing ? 'cell--editing' : ''}`}
         style={{ width: col.width, minWidth: col.width }}
-        onClick={() => { if (isMobile) { onMobileTap(); } else { onStartEdit(); setShowSelect(true); } }}>
+        onClick={() => { onStartEdit(); setShowSelect(true); }}>
         <div className="cell-inner">
           <Badge value={value} type={key} />
-          {!isMobile && <span className="select-caret">▾</span>}
+          <span className="select-caret">▾</span>
         </div>
-        {!isMobile && isEditing && showSelect && (
+        {isEditing && showSelect && (
           <SelectDropdown value={value} colKey={key}
             onChange={v => { onCommit(key, v); setShowSelect(false); }}
             onClose={() => setShowSelect(false)} />
@@ -182,16 +248,15 @@ function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, 
 
   /* URL */
   if (type === 'url') {
-    if (!isEditing || isMobile) {
+    if (!isEditing) {
       return (
-        <td className={`cell cell--url ${frozenClass}`}
+        <td className="cell cell--url"
           style={{ width: col.width, minWidth: col.width }}
-          onDoubleClick={!isMobile ? onStartEdit : undefined}
-          onClick={isMobile ? onMobileTap : undefined}>
+          onDoubleClick={onStartEdit}>
           <div className="cell-inner">
             {value
               ? <a href={value} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}>
-                  {isMobile ? '🔗 Open Trial' : value.replace('https://clinicaltrials.gov/study/', 'NCT → ')}
+                  {value.replace('https://clinicaltrials.gov/study/', 'NCT → ')}
                 </a>
               : <span className="cell-empty">—</span>}
           </div>
@@ -199,7 +264,7 @@ function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, 
       );
     }
     return (
-      <td className={`cell cell--editing ${frozenClass}`} style={{ width: col.width, minWidth: col.width }}>
+      <td className="cell cell--editing" style={{ width: col.width, minWidth: col.width }}>
         <input ref={ref} className="cell-input" value={draft}
           onChange={e => setDraft(e.target.value)} onBlur={commit}
           onKeyDown={e => {
@@ -213,18 +278,17 @@ function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, 
 
   /* Textarea */
   if (type === 'textarea') {
-    if (!isEditing || isMobile) {
+    if (!isEditing) {
       return (
-        <td className={`cell cell--textarea ${frozenClass}`}
+        <td className="cell cell--textarea"
           style={{ width: col.width, minWidth: col.width }}
-          onDoubleClick={!isMobile ? onStartEdit : undefined}
-          onClick={isMobile ? onMobileTap : undefined}>
+          onDoubleClick={onStartEdit}>
           <div className="cell-inner cell-inner--clamp">{value || <span className="cell-empty">—</span>}</div>
         </td>
       );
     }
     return (
-      <td className={`cell cell--editing cell--textarea ${frozenClass}`} style={{ width: col.width, minWidth: col.width }}>
+      <td className="cell cell--editing cell--textarea" style={{ width: col.width, minWidth: col.width }}>
         <textarea ref={ref} className="cell-textarea" value={draft}
           onChange={e => setDraft(e.target.value)} onBlur={commit} rows={5}
           onKeyDown={e => {
@@ -236,16 +300,16 @@ function Cell({ row, col, isEditing, onStartEdit, onCommit, onKeyNav, isMobile, 
   }
 
   /* Text (default) */
-  if (!isEditing || isMobile) {
+  if (!isEditing) {
     return (
-      <td className={`cell ${frozenClass}`} style={{ width: col.width, minWidth: col.width }}
-        onClick={tap}>
+      <td className="cell" style={{ width: col.width, minWidth: col.width }}
+        onClick={onStartEdit}>
         <div className="cell-inner">{value || <span className="cell-empty">—</span>}</div>
       </td>
     );
   }
   return (
-    <td className={`cell cell--editing ${frozenClass}`} style={{ width: col.width, minWidth: col.width }}>
+    <td className="cell cell--editing" style={{ width: col.width, minWidth: col.width }}>
       <input ref={ref} className="cell-input" value={draft}
         onChange={e => setDraft(e.target.value)} onBlur={commit}
         onKeyDown={e => {
@@ -265,8 +329,8 @@ const PRIORITY_ORDER = { '⭐⭐⭐ Top Priority': 0, '⭐⭐ Strong Option': 1,
 export default function App() {
   const isMobile = useIsMobile();
   const [rows, setRows] = useState(loadData);
-  const [editCell, setEditCell] = useState(null);       // desktop inline edit
-  const [mobileEdit, setMobileEdit] = useState(null);   // mobile modal edit { rowId, colKey }
+  const [editCell, setEditCell] = useState(null);
+  const [mobileEdit, setMobileEdit] = useState(null);   // { row, col }
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState({ key: 'trialName', dir: 'asc' });
@@ -282,10 +346,14 @@ export default function App() {
 
   const addRow = () => {
     const newRow = { id: String(Date.now()), ...Object.fromEntries(COLUMNS.map(c => [c.key, ''])) };
-    newRow.status = 'Recruiting'; newRow.location = 'USA 🇺🇸';
+    newRow.status = 'Recruiting';
     setRows(prev => [...prev, newRow]);
-    if (!isMobile) setTimeout(() => setEditCell({ rowId: newRow.id, colKey: 'trialName' }), 50);
-    else setTimeout(() => setMobileEdit({ rowId: newRow.id, colKey: 'trialName' }), 50);
+    if (isMobile) {
+      // open the edit modal for the trial name of the new row
+      setTimeout(() => setMobileEdit({ row: newRow, col: COLUMNS.find(c => c.key === 'trialName') }), 50);
+    } else {
+      setTimeout(() => setEditCell({ rowId: newRow.id, colKey: 'trialName' }), 50);
+    }
   };
 
   const deleteRow = id => { setRows(prev => prev.filter(r => r.id !== id)); setConfirmDelete(null); };
@@ -324,13 +392,14 @@ export default function App() {
     if (filtered[nr]) setEditCell({ rowId: filtered[nr].id, colKey: COLUMNS[nc].key });
   }, [filtered]);
 
-  const mobileEditRow = mobileEdit ? rows.find(r => r.id === mobileEdit.rowId) : null;
-  const mobileEditCol = mobileEdit ? COLUMNS.find(c => c.key === mobileEdit.colKey) : null;
-
   const recruitingCount = rows.filter(r => r.status === 'Recruiting').length;
   const topCount = rows.filter(r => r.priority === '⭐⭐⭐ Top Priority').length;
-
   const activeFilters = Object.keys(filters).length;
+
+  // Keep mobileEdit row in sync with latest saved data
+  const mobileEditRow = mobileEdit
+    ? (rows.find(r => r.id === mobileEdit.row.id) ?? mobileEdit.row)
+    : null;
 
   return (
     <div className="app" onClick={() => !isMobile && setEditCell(null)}>
@@ -353,7 +422,7 @@ export default function App() {
           {isMobile ? (
             <>
               <button className="btn btn--icon" onClick={() => setShowSearch(s => !s)} title="Search">🔍</button>
-              <button className="btn btn--primary" onClick={addRow}>+</button>
+              <button className="btn btn--primary" onClick={addRow}>＋</button>
             </>
           ) : (
             <>
@@ -381,7 +450,7 @@ export default function App() {
               <select key={key}
                 className={`filter-select ${filters[key] ? 'filter-select--active' : ''}`}
                 value={filters[key] || ''} onChange={e => setFilter(key, e.target.value)}>
-                <option value="">{isMobile ? col.label.replace('Treatment Type', 'Treatment').replace('MS Type', 'MS') : `All ${col.label}`}</option>
+                <option value="">{isMobile ? col.label.replace('Treatment Type', 'Type').replace('MS Type Eligible', 'MS') : `All ${col.label}`}</option>
                 {SELECT_OPTIONS[key].map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             );
@@ -395,64 +464,70 @@ export default function App() {
         {!isMobile && <span className="row-count">{filtered.length} of {rows.length} rows</span>}
       </div>
 
-      {/* ── Table ── */}
-      <div className="table-container">
-        <table className="sheet" onClick={e => e.stopPropagation()}>
-          <thead>
-            <tr>
-              <th className="col-actions col-actions--header" style={{ width: 40, minWidth: 40 }}></th>
-              {COLUMNS.map((col, ci) => (
-                <th key={col.key}
-                  style={{ width: col.width, minWidth: col.width }}
-                  className={`col-header ${sort.key === col.key ? 'col-header--sorted' : ''} ${ci === 0 ? 'col-header--frozen' : ''}`}
-                  onClick={() => handleSort(col.key)}>
-                  <span className="col-label">{col.label}</span>
-                  <span className="sort-icon">{sort.key === col.key ? (sort.dir === 'asc' ? '↑' : '↓') : '⇅'}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row, rowIdx) => (
-              <tr key={row.id} className={`row row--${rowIdx % 2 === 0 ? 'even' : 'odd'}`}>
-                <td className="col-actions">
-                  <button className="delete-btn" title="Delete"
-                    onClick={e => { e.stopPropagation(); setConfirmDelete(row.id); }}>✕</button>
-                </td>
+      {/* ── MOBILE: Accordion list ── */}
+      {isMobile ? (
+        <div className="mobile-list-container">
+          {filtered.length === 0
+            ? <div className="mobile-empty">No trials match your search.</div>
+            : <MobileList
+                rows={filtered}
+                onEdit={(row, col) => setMobileEdit({ row, col })}
+                onDelete={id => setConfirmDelete(id)}
+              />
+          }
+          <div className="mobile-list-footer">
+            <span>{filtered.length} of {rows.length} trials</span>
+            <button className="btn btn--ghost btn--sm" onClick={() => exportCSV(filtered)}>↓ CSV</button>
+          </div>
+        </div>
+      ) : (
+        /* ── DESKTOP: Spreadsheet table ── */
+        <div className="table-container">
+          <table className="sheet" onClick={e => e.stopPropagation()}>
+            <thead>
+              <tr>
+                <th className="col-actions col-actions--header" style={{ width: 40, minWidth: 40 }}></th>
                 {COLUMNS.map((col, ci) => (
-                  <Cell key={col.key} row={row} col={col}
-                    isFrozen={ci === 0}
-                    isMobile={isMobile}
-                    isEditing={!isMobile && editCell?.rowId === row.id && editCell?.colKey === col.key}
-                    onStartEdit={() => setEditCell({ rowId: row.id, colKey: col.key })}
-                    onMobileTap={() => setMobileEdit({ rowId: row.id, colKey: col.key })}
-                    onCommit={(k, v) => updateCell(row.id, k, v)}
-                    onKeyNav={dir => navigateCell(row.id, col.key, dir)} />
+                  <th key={col.key}
+                    style={{ width: col.width, minWidth: col.width }}
+                    className={`col-header ${sort.key === col.key ? 'col-header--sorted' : ''} ${ci === 0 ? 'col-header--frozen' : ''}`}
+                    onClick={() => handleSort(col.key)}>
+                    <span className="col-label">{col.label}</span>
+                    <span className="sort-icon">{sort.key === col.key ? (sort.dir === 'asc' ? '↑' : '↓') : '⇅'}</span>
+                  </th>
                 ))}
               </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr><td colSpan={COLUMNS.length + 1} className="empty-state">No trials match.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ── Mobile row count bar ── */}
-      {isMobile && (
-        <div className="mobile-status-bar">
-          <span>{filtered.length} of {rows.length} trials</span>
-          <button className="btn btn--ghost btn--sm" onClick={() => exportCSV(filtered)}>↓ CSV</button>
-          <button className="btn btn--primary btn--sm" onClick={addRow}>+ Add</button>
+            </thead>
+            <tbody>
+              {filtered.map((row, rowIdx) => (
+                <tr key={row.id} className={`row row--${rowIdx % 2 === 0 ? 'even' : 'odd'}`}>
+                  <td className="col-actions">
+                    <button className="delete-btn" title="Delete"
+                      onClick={e => { e.stopPropagation(); setConfirmDelete(row.id); }}>✕</button>
+                  </td>
+                  {COLUMNS.map((col, ci) => (
+                    <Cell key={col.key} row={row} col={col}
+                      isEditing={editCell?.rowId === row.id && editCell?.colKey === col.key}
+                      onStartEdit={() => setEditCell({ rowId: row.id, colKey: col.key })}
+                      onCommit={(k, v) => updateCell(row.id, k, v)}
+                      onKeyNav={dir => navigateCell(row.id, col.key, dir)} />
+                  ))}
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={COLUMNS.length + 1} className="empty-state">No trials match.</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
       {/* ── Mobile edit modal ── */}
-      {isMobile && mobileEdit && mobileEditRow && mobileEditCol && (
+      {isMobile && mobileEdit && mobileEditRow && (
         <MobileEditModal
           row={mobileEditRow}
-          col={mobileEditCol}
-          onSave={(k, v) => updateCell(mobileEdit.rowId, k, v)}
+          col={mobileEdit.col}
+          onSave={(k, v) => updateCell(mobileEditRow.id, k, v)}
           onClose={() => setMobileEdit(null)} />
       )}
 
