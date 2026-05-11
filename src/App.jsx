@@ -346,7 +346,7 @@ export default function App() {
 
   const addRow = () => {
     const newRow = { id: String(Date.now()), ...Object.fromEntries(COLUMNS.map(c => [c.key, ''])) };
-    newRow.status = 'Recruiting';
+    newRow.status = 'Not Contacted';
     setRows(prev => [...prev, newRow]);
     if (isMobile) {
       // open the edit modal for the trial name of the new row
@@ -392,8 +392,8 @@ export default function App() {
     if (filtered[nr]) setEditCell({ rowId: filtered[nr].id, colKey: COLUMNS[nc].key });
   }, [filtered]);
 
-  const recruitingCount = rows.filter(r => r.status === 'Recruiting').length;
-  const topCount = rows.filter(r => r.priority === '⭐⭐⭐ Top Priority').length;
+  const contactedCount = rows.filter(r => r.status === 'Contacted' || r.status === 'In Talks').length;
+  const inTalksCount = rows.filter(r => r.status === 'In Talks').length;
   const activeFilters = Object.keys(filters).length;
 
   // Keep mobileEdit row in sync with latest saved data
@@ -415,8 +415,8 @@ export default function App() {
         </div>
         <div className="header-stats">
           <div className="stat"><span className="stat-num">{rows.length}</span><span className="stat-label">Total</span></div>
-          <div className="stat stat--green"><span className="stat-num">{recruitingCount}</span><span className="stat-label">Recruiting</span></div>
-          <div className="stat stat--purple"><span className="stat-num">{topCount}</span><span className="stat-label">Top</span></div>
+          <div className="stat stat--green"><span className="stat-num">{contactedCount}</span><span className="stat-label">Contacted</span></div>
+          <div className="stat stat--purple"><span className="stat-num">{inTalksCount}</span><span className="stat-label">In Talks</span></div>
         </div>
         <div className="header-actions">
           {isMobile ? (

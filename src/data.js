@@ -4,7 +4,7 @@ export const COLUMNS = [
   { key: 'contactPhone',   label: 'Contact Phone',   type: 'text',     width: 140 },
   { key: 'notes',          label: 'Notes',           type: 'textarea', width: 240 },
   { key: 'url',            label: 'URL',             type: 'url',      width: 200 },
-  { key: 'status',         label: 'Status',          type: 'select',   width: 150 },
+  { key: 'status',         label: 'Contact Status',  type: 'select',   width: 160 },
   { key: 'treatmentType',  label: 'Treatment Type',  type: 'select',   width: 160 },
   { key: 'msTypeEligible', label: 'MS Type',         type: 'select',   width: 150 },
   { key: 'nctNumber',      label: 'NCT Number',      type: 'text',     width: 130 },
@@ -14,7 +14,7 @@ export const COLUMNS = [
 
 export const SELECT_OPTIONS = {
   priority: ['⭐⭐⭐ Top Priority', '⭐⭐ Strong Option', '⭐ Consider'],
-  status: ['Recruiting', 'Not Yet Recruiting', 'Completed', 'Suspended'],
+  status: ['Not Contacted', 'Contacted', 'In Talks'],
   treatmentType: ['CAR-T Cell Therapy', 'HSCT / Stem Cell', 'Regulatory T Cell', 'Remyelination', 'Allogeneic CAR-T', 'BTK Inhibitor', 'Novel Biologic', 'Neuroprotection', 'Precision Medicine'],
   msTypeEligible: ['RRMS', 'Progressive', 'Any MS', 'Refractory/Relapsing'],
   location: ['USA 🇺🇸', 'China 🇨🇳', 'Europe 🇪🇺', 'International 🌍', 'Russia 🇷🇺', 'Taiwan 🇹🇼'],
@@ -27,10 +27,9 @@ export const BADGE_COLORS = {
     '⭐ Consider':          { bg: '#fef9c3', color: '#854d0e', border: '#fde047' },
   },
   status: {
-    'Recruiting':           { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
-    'Not Yet Recruiting':   { bg: '#fef9c3', color: '#854d0e', border: '#fde047' },
-    'Completed':            { bg: '#e5e7eb', color: '#374151', border: '#9ca3af' },
-    'Suspended':            { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+    'Not Contacted': { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
+    'Contacted':     { bg: '#fef9c3', color: '#854d0e', border: '#fde047' },
+    'In Talks':      { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
   },
   treatmentType: {
     'CAR-T Cell Therapy':   { bg: '#ede9fe', color: '#5b21b6', border: '#c4b5fd' },
@@ -57,7 +56,7 @@ const id = () => String(_id++);
 export const INITIAL_DATA = [
   {
     id: id(), trialName: 'Frexalimab Phase III — Relapsing MS (Sanofi, 1600 patients)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT06141473', enrollment: '1600',
     startDate: '2023-12-13', nearestSite: 'Many US sites: CA, AL, AZ, CO, FL, IL, MI, MN, MO, NJ, NY, OH, TX and more',
     keyCaveat: 'Requires washout from Alemtuzumab (duration TBD). Comparator is teriflunomide. Must not have prior CD40L therapy. Many US sites available.',
@@ -66,7 +65,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'BEAT-MS — Autologous HSCT vs Best Available Therapy',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'HSCT / Stem Cell',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'HSCT / Stem Cell',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT04047628', enrollment: '156',
     startDate: '2019-12-19', nearestSite: 'Stanford MS Center, Palo Alto, CA (25 min from San Jose)',
     keyCaveat: 'Requires stopping Alemtuzumab (washout needed). Significant short-term risk (hospitalization, infection). Requires prior failure of 2+ DMTs — Shabnam qualifies.',
@@ -75,7 +74,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'mRNA-1195 Tolerogenic Vaccine — MS Relapse Prevention (Moderna)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT06735248', enrollment: '180',
     startDate: '2025-04-16', nearestSite: 'Washington Univ. St. Louis MO | Boston MA | Quest Research Farmington Hills MI',
     keyCaveat: 'Age limit ≤55 (Shabnam is 28 ✓). Phase II, 180 participants. Novel mechanism with limited prior human data. May require washout from Alemtuzumab.',
@@ -84,7 +83,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'KYV-101 Anti-CD19 CAR-T Therapy — Progressive MS',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'CAR-T Cell Therapy',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06138132', enrollment: '12',
     startDate: '2024-04-10', nearestSite: 'Stanford MS Center, Palo Alto, CA (25 min from San Jose)',
     keyCaveat: 'Currently recruiting for progressive forms of MS. Shabnam is RRMS but has progressive features — eligibility needs confirmation with Stanford. Requires lymphodepletion (chemo conditioning).',
@@ -93,7 +92,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Obe-cel (Obecabtagene Autoleucel) CAR-T — Refractory Progressive MS (Autolus/Stanford)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'CAR-T Cell Therapy',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT07139743', enrollment: '18',
     startDate: '2025-08-04', nearestSite: 'Stanford University, Redwood City, CA (30 min from San Jose)',
     keyCaveat: 'Currently for progressive/refractory forms. Shabnam is RRMS but has progressive features — confirm eligibility with Stanford. Requires lymphodepletion conditioning chemo.',
@@ -102,7 +101,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'CC-97540 CAR-T (BMS/Juno) — Relapsing & Progressive MS (Breakfree-2)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'CAR-T Cell Therapy',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT06220201', enrollment: '120',
     startDate: '2024-03-28', nearestSite: 'UC Irvine CA | Univ. of Colorado | Univ. of Alabama | Colorado Blood Cancer Institute',
     keyCaveat: 'Phase I — still establishing safety/tolerability. Requires lymphodepletion (fludarabine + cyclophosphamide). Alemtuzumab washout period likely needed.',
@@ -111,7 +110,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Remibrutinib Phase III — Secondary Progressive MS (Novartis, 1275 patients)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'BTK Inhibitor',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'BTK Inhibitor',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT07225504', enrollment: '1275',
     startDate: '2025-11-11', nearestSite: 'CA (Fullerton), AZ, AL, CO, FL and many more US sites',
     keyCaveat: 'SPMS indication. Shabnam has RRMS with progressive features — confirm eligibility. BTK inhibitors require monitoring for infections/liver. Washout from Alemtuzumab needed.',
@@ -120,7 +119,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Remibrutinib Switch Study — After Anti-CD20, RRMS (Novartis, 360 patients)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'BTK Inhibitor',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'BTK Inhibitor',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT06846281', enrollment: '360',
     startDate: '2025-07-23', nearestSite: 'AZ, DC, FL, GA, IL, MA, MI, MN, NJ, NY, OH, TX, VA and more — many US sites',
     keyCaveat: 'Designed for patients switching FROM anti-CD20 (Shabnam\'s history). Must confirm if prior Alemtuzumab is acceptable. Requires washout period from Alemtuzumab.',
@@ -129,7 +128,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'TRAP-MS Precision Biomarker-Guided Combination Therapy — MS (NIH/NIAID)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Precision Medicine',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Precision Medicine',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT03109288', enrollment: '250',
     startDate: '2017-08-11', nearestSite: 'NIH Clinical Center, Bethesda, MD',
     keyCaveat: "NIH Bethesda MD requires travel. Best for patients with residual activity despite DMT — exactly Shabnam's situation. Multi-drug protocol is complex.",
@@ -138,7 +137,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'RO7121932 Novel Biologic — MS (Roche/Genentech, Stanford)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT05704361', enrollment: '129',
     startDate: '2021-08-11', nearestSite: 'Stanford Medical Center, Stanford CA (20 min from San Jose!) | Yale CT | USF FL | UMass MA',
     keyCaveat: 'Phase I safety/PK focus. Stanford site means she may enroll through existing relationship with her care team there. Requires Alemtuzumab washout.',
@@ -147,7 +146,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'AZD0120 Anti-BDCA2 Novel Biologic — MS (AstraZeneca)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07224373', enrollment: '24',
     startDate: '2025-12-09', nearestSite: 'AZ, CO, DC, MO, NY, OR — multiple US research sites',
     keyCaveat: 'Phase I/II, 24 participants, open-label. Early stage with limited prior human safety data. Washout from Alemtuzumab required.',
@@ -156,7 +155,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'P-CD19CD20-ALLO1 — Allogeneic Dual-Target CAR-T for MS',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Allogeneic CAR-T',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Allogeneic CAR-T',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07008378', enrollment: '60',
     startDate: '2025-10-15', nearestSite: 'Washington University, St. Louis, MO',
     keyCaveat: 'Only US site is St. Louis, MO (travel required). Phase I safety trial — very early stage. Includes lymphodepletion chemo. Alemtuzumab washout period likely required.',
@@ -165,7 +164,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Frexalimab Phase III — Non-Relapsing SPMS (Sanofi, 900 patients)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06141486', enrollment: '900',
     startDate: '2023-12-27', nearestSite: 'Many US sites: AZ, AL, CA, CO, FL, TX and more',
     keyCaveat: 'Non-relapsing SPMS only. Shabnam is RRMS — confirm eligibility via progressive features. Alemtuzumab washout required.',
@@ -174,7 +173,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Foralumab Nasal Spray Phase II — Non-Active SPMS (Brigham & Women\'s/Harvard)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06890923', enrollment: '55',
     startDate: '2025-03-04', nearestSite: "Brigham and Women's Hospital, Boston, MA",
     keyCaveat: 'Non-active SPMS only. Shabnam is RRMS — check if progressive features qualify. Small trial (55 patients), Phase II. Primary completion April 2026 — verify still enrolling.',
@@ -183,7 +182,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Foralumab Nasal Phase II/III — Non-Active SPMS (Yale/JHU/BWH)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT06292923', enrollment: '54',
     startDate: '2023-11-15', nearestSite: 'Yale CT | Johns Hopkins MD | Brigham & Women\'s MA | UMass | U Buffalo NY',
     keyCaveat: 'SPMS indication. Confirm if progressive features qualify Shabnam. Primary completion Nov 2025 — verify still enrolling. Alemtuzumab washout needed.',
@@ -192,7 +191,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Remibrutinib MRI Sub-study — RRMS & SPMS (Cleveland Clinic)',
-    priority: '⭐⭐ Strong Option', status: 'Not Yet Recruiting', treatmentType: 'BTK Inhibitor',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'BTK Inhibitor',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT07222956', enrollment: '20',
     startDate: '2026-04-01', nearestSite: 'Cleveland Clinic, Cleveland, OH',
     keyCaveat: 'Not yet recruiting. Small (20 patients) — fills quickly. Ohio requires travel. Washout from Alemtuzumab needed.',
@@ -201,7 +200,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Frexalimab SC vs IV — Phase II PK/PD Study (Sanofi)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Novel Biologic',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Novel Biologic',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT07325292', enrollment: '160',
     startDate: '2026-01-14', nearestSite: 'AL, AZ, CA, CO, CT, FL, IL, MI, MN, MO, NJ, NY, NC, OH, PA, TX and more',
     keyCaveat: 'PK/formulation study comparing SC vs IV frexalimab. Patients must qualify de novo for frexalimab. Washout from Alemtuzumab required. Small (160 patients).',
@@ -210,7 +209,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Orelabrutinib BTK Inhibitor — Secondary Progressive MS (Zenas, 990 patients)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'BTK Inhibitor',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'BTK Inhibitor',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT07299019', enrollment: '990',
     startDate: '2026-03', nearestSite: 'Neurology Associates, Maitland, FL',
     keyCaveat: 'SPMS only currently. Shabnam has RRMS — confirm progressive eligibility. Limited US sites so far. More sites expected given 990-patient enrollment target.',
@@ -219,7 +218,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Senolytics (Dasatinib + Quercetin) — Secondary Progressive MS (Ohio State)',
-    priority: '⭐⭐ Strong Option', status: 'Not Yet Recruiting', treatmentType: 'Neuroprotection',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Neuroprotection',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT07270120', enrollment: '30',
     startDate: '2026-01-15', nearestSite: 'Ohio State University, Columbus, OH',
     keyCaveat: 'SPMS only. Shabnam is RRMS — progressive features may qualify. Small trial (30 patients). Columbus OH requires travel.',
@@ -228,7 +227,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'NLY01 GLP-1 Receptor Agonist — MS Neuroprotection (Johns Hopkins)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Neuroprotection',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Neuroprotection',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07497399', enrollment: '120',
     startDate: '2026-04', nearestSite: 'Johns Hopkins University, Baltimore, MD',
     keyCaveat: 'Phase II add-on. Primarily neuroprotective — not immunosuppressive replacement. JHU Baltimore site only. Best combined with existing DMT.',
@@ -237,7 +236,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Clemastine Fumarate Remyelination — RRMS/PPMS/SPMS (UCSF San Francisco)',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Remyelination',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Remyelination',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT05359653', enrollment: '74',
     startDate: '2023-08-01', nearestSite: 'UCSF Sandler Neurosciences, San Francisco, CA (45 min from San Jose!)',
     keyCaveat: 'Remyelination add-on, not a replacement for immunotherapy. RRMS/PPMS/SPMS all eligible. Very close to San Jose. Can likely be combined with current Alemtuzumab.',
@@ -246,7 +245,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'SetPoint Vagus Nerve Stimulation — Pro-Remyelination in RRMS',
-    priority: '⭐⭐ Strong Option', status: 'Recruiting', treatmentType: 'Remyelination',
+    priority: '⭐⭐ Strong Option', status: 'Not Contacted', treatmentType: 'Remyelination',
     msTypeEligible: 'RRMS', location: 'USA 🇺🇸', nctNumber: 'NCT06796504', enrollment: '60',
     startDate: '2026-03-31', nearestSite: 'Shepherd Center Atlanta GA | UW Medicine Seattle WA | Minnesota MS Center',
     keyCaveat: 'Requires surgical implant (minimally invasive). Add-on to existing DMTs, not a replacement. RRMS only. US sites: Atlanta GA, Seattle WA, Plymouth MN.',
@@ -255,7 +254,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Orelabrutinib BTK Inhibitor — Primary Progressive MS (Zenas, 705 patients)',
-    priority: '⭐ Consider', status: 'Recruiting', treatmentType: 'BTK Inhibitor',
+    priority: '⭐ Consider', status: 'Not Contacted', treatmentType: 'BTK Inhibitor',
     msTypeEligible: 'Progressive', location: 'USA 🇺🇸', nctNumber: 'NCT07067463', enrollment: '705',
     startDate: '2025-12', nearestSite: 'Neurology Associates Maitland FL | Premier Neurology Greenville SC',
     keyCaveat: 'PPMS only. Shabnam has RRMS — confirm if progressive features allow enrollment. Limited US sites currently. Alemtuzumab washout required.',
@@ -264,7 +263,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Metformin Add-on for MS Neuroprotection (SUNY Buffalo)',
-    priority: '⭐ Consider', status: 'Recruiting', treatmentType: 'Neuroprotection',
+    priority: '⭐ Consider', status: 'Not Contacted', treatmentType: 'Neuroprotection',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT06463743', enrollment: '30',
     startDate: '2025-09-24', nearestSite: 'UBMD Neurology, Buffalo, NY',
     keyCaveat: 'Small trial (30 patients). Add-on — not a replacement for immunotherapy. Buffalo NY requires travel. More supportive than curative on its own.',
@@ -273,7 +272,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'Clemastine Fumarate — Acute Demyelinating Lesions with MRI Endpoints (UCSF)',
-    priority: '⭐ Consider', status: 'Not Yet Recruiting', treatmentType: 'Remyelination',
+    priority: '⭐ Consider', status: 'Not Contacted', treatmentType: 'Remyelination',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT06065670', enrollment: '44',
     startDate: '2026-09-15', nearestSite: 'UCSF Sandler Neurosciences, San Francisco, CA (45 min from San Jose!)',
     keyCaveat: 'Not yet recruiting (starts Sept 2026). Requires presence of active demyelinating lesion per MRI — eligibility depends on Shabnam\'s current imaging. Add-on, not replacement.',
@@ -282,7 +281,7 @@ export const INITIAL_DATA = [
   },
   {
     id: id(), trialName: 'KITE-363 Dual Anti-CD19/CD20 CAR-T — Relapsing & Progressive MS (Kite/Gilead)',
-    priority: '⭐⭐⭐ Top Priority', status: 'Recruiting', treatmentType: 'CAR-T Cell Therapy',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
     msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07304154', enrollment: '52',
     startDate: '2026-04-10', nearestSite: 'LDS Hospital – Intermountain Health, Salt Lake City UT | Stanford (pending Dr. Lee) | Fred Hutchinson, Seattle WA',
     keyCaveat: 'Phase 1, only 52 patients — fills fast. Autologous CAR-T requires cell harvesting. Lymphodepletion chemo required. Also covers CIDP & Myasthenia Gravis. Stanford site confirmed but awaiting Dr. Lee response.',
