@@ -5,14 +5,20 @@ import './App.css';
 const STORAGE_KEY = 'ms-clinical-trials-v1';
 
 /* ── Data helpers ── */
+const OLD_STATUSES = new Set(['Recruiting', 'Not Yet Recruiting', 'Completed', 'Suspended']);
+
 function loadData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      const savedNcts = new Set(parsed.map(r => r.nctNumber).filter(Boolean));
+      // Migrate old trial-status values → contact-status default
+      const migrated = parsed.map(r =>
+        OLD_STATUSES.has(r.status) ? { ...r, status: 'Not Contacted' } : r
+      );
+      const savedNcts = new Set(migrated.map(r => r.nctNumber).filter(Boolean));
       const newTrials = INITIAL_DATA.filter(r => r.nctNumber && !savedNcts.has(r.nctNumber));
-      return newTrials.length > 0 ? [...parsed, ...newTrials] : parsed;
+      return newTrials.length > 0 ? [...migrated, ...newTrials] : migrated;
     }
   } catch {}
   return INITIAL_DATA;
