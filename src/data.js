@@ -304,4 +304,16 @@ export const INITIAL_DATA = [
     contactPhone: '(415) 353-2069',
     notes: 'UCSF Multiple Sclerosis and Neuroinflammation Center — 1651 4th St Suite 252, San Francisco, CA 94158. PI: Dr. Bruce Cree.',
   },
+  {
+    id: id(), trialName: 'RESET-MS — CABA-201 Anti-CD19 CAR-T for Relapsing & Progressive MS (Cabaletta Bio)',
+    priority: '⭐⭐⭐ Top Priority', status: 'Not Contacted', treatmentType: 'CAR-T Cell Therapy',
+    msTypeEligible: 'Any MS', location: 'USA 🇺🇸', nctNumber: 'NCT07006805', enrollment: '12',
+    startDate: '2026-06', nearestSite: 'Sites not yet listed — estimated start June 2026. Contact sponsor to be added to waitlist.',
+    keyCaveat: 'Not yet recruiting — only 12 patients, will fill extremely fast. Ages 18–60 ✓. Prior high-efficacy therapy failure required (Shabnam qualifies). Prior alemtuzumab must be >1 year ago — confirm timing. Lymphodepletion chemo required.',
+    whyBetter: 'Cabaletta Bio\'s CABA-201 autologous anti-CD19 CAR-T covers both relapsing AND progressive MS — one of the few trials open to all MS types. Phase 1/2. Same deep B cell depletion mechanism as other leading CAR-T trials. Getting on the waitlist now is critical given only 12 spots.',
+    url: 'https://clinicaltrials.gov/study/NCT07006805',
+    contactEmail: 'clinicaltrials@cabalettabio.com',
+    contactPhone: '267-759-3100 ext. 4444',
+    notes: '',
+  },
 ];
