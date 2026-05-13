@@ -252,6 +252,60 @@ function LinkStudyModal({ hospital, allTrials, onSave, onClose, isMobile }) {
 }
 
 /* ══════════════════════════════════════════
+   CONTACT EDIT MODAL
+══════════════════════════════════════════ */
+function ContactEditModal({ contact, hospital, isNew, onSave, onClose, isMobile }) {
+  const [draft, setDraft] = useState({ ...contact });
+  const nameRef = useRef(null);
+  useEffect(() => { setTimeout(() => nameRef.current?.focus(), 60); }, []);
+
+  return (
+    <div className="edit-modal-overlay" onClick={onClose}>
+      <div className={`edit-modal ${isMobile ? 'edit-modal--bottom' : 'edit-modal--center'}`}
+        onClick={e => e.stopPropagation()}>
+        <div className="edit-modal-header">
+          <button className="edit-modal-btn edit-modal-btn--cancel" onClick={onClose}>Cancel</button>
+          <span className="edit-modal-title">{isNew ? 'Add Contact' : 'Edit Contact'}</span>
+          <button className="edit-modal-btn edit-modal-btn--save"
+            onClick={() => { onSave(draft); onClose(); }}>Save</button>
+        </div>
+        <div className="edit-modal-context">{hospital.name}</div>
+        <div className="edit-modal-body">
+          <div className="contact-form">
+            <label className="contact-form-label">Name</label>
+            <input ref={nameRef} className="edit-input" value={draft.name}
+              onChange={e => setDraft(p => ({ ...p, name: e.target.value }))}
+              placeholder="Contact name…" />
+
+            <label className="contact-form-label">Email</label>
+            <input className="edit-input" type="email" value={draft.email}
+              onChange={e => setDraft(p => ({ ...p, email: e.target.value }))}
+              placeholder="email@hospital.com" />
+
+            <label className="contact-form-label">Email Status</label>
+            <div className="edit-select-grid">
+              {['Email Not Sent', 'Email Sent'].map(opt => (
+                <button key={opt}
+                  className={`edit-select-opt ${draft.emailStatus === opt ? 'edit-select-opt--active' : ''}`}
+                  onClick={() => setDraft(p => ({ ...p, emailStatus: opt }))}>
+                  <span className={`email-status-dot email-status-dot--${opt === 'Email Sent' ? 'sent' : 'not-sent'}`} />
+                  {opt}
+                </button>
+              ))}
+            </div>
+
+            <label className="contact-form-label">Phone</label>
+            <input className="edit-input" type="tel" value={draft.phone}
+              onChange={e => setDraft(p => ({ ...p, phone: e.target.value }))}
+              placeholder="(555) 000-0000" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
    STUDIES TAB — Accordion
 ══════════════════════════════════════════ */
 function StudiesAccordion({ rows, onEdit, onDelete, isMobile }) {
@@ -324,6 +378,7 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
   const [editingHospital, setEditingHospital] = useState(null);
   const [linkingHospital, setLinkingHospital] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [editingContact, setEditingContact] = useState(null); // { hospital, contact, isNew }
 
   const handleSaveField = (hospital, key, value) => {
     onUpdateHospital({ ...hospital, [key]: value });
@@ -333,12 +388,39 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
     onUpdateHospital({ ...hospital, linkedStudies });
   };
 
+  const addContact = (hosp) => {
+    const blank = { id: `c-${Date.now()}`, name: '', email: '', emailStatus: 'Email Not Sent', phone: '' };
+    setEditingContact({ hospital: hosp, contact: blank, isNew: true });
+  };
+
+  const saveContact = (hosp, contact, isNew) => {
+    const contacts = [...(hosp.contacts || [])];
+    if (isNew) {
+      contacts.push(contact);
+    } else {
+      const idx = contacts.findIndex(c => c.id === contact.id);
+      if (idx >= 0) contacts[idx] = contact;
+    }
+    onUpdateHospital({ ...hosp, contacts });
+  };
+
+  const updateContactField = (hosp, contactId, key, value) => {
+    const contacts = (hosp.contacts || []).map(c => c.id === contactId ? { ...c, [key]: value } : c);
+    onUpdateHospital({ ...hosp, contacts });
+  };
+
+  const removeContact = (hosp, contactId) => {
+    const contacts = (hosp.contacts || []).filter(c => c.id !== contactId);
+    onUpdateHospital({ ...hosp, contacts });
+  };
+
   return (
     <div className="list-container">
       <div className="accordion-list">
-        {hospitals.map((hosp, idx) => {
+        {hospitals.map((hosp) => {
           const isOpen = expandedId === hosp.id;
           const linkedTrials = allTrials.filter(t => (hosp.linkedStudies || []).includes(t.id));
+          const contacts = hosp.contacts || [];
           return (
             <div key={hosp.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''}`}>
               {/* Collapsed header */}
@@ -347,6 +429,9 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
                 <span className="accord-name">{hosp.name || <em>Unnamed Hospital</em>}</span>
                 <div className="accord-badges">
                   {hosp.contactStatus && <Badge value={hosp.contactStatus} type="status" />}
+                  {contacts.length > 0 && (
+                    <span className="hosp-contact-count">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</span>
+                  )}
                   {linkedTrials.length > 0 && (
                     <span className="hosp-study-count">{linkedTrials.length} stud{linkedTrials.length === 1 ? 'y' : 'ies'}</span>
                   )}
@@ -357,7 +442,7 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
               {/* Expanded */}
               {isOpen && (
                 <div className="accord-body">
-                  {/* Contact info grid */}
+                  {/* Hospital info fields (website, contactStatus, notes) */}
                   <div className="accord-fields">
                     {HOSPITAL_FIELDS.filter(f => f.key !== 'name').map(f => {
                       const val = hosp[f.key] ?? '';
@@ -380,12 +465,67 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
                     })}
                   </div>
 
-                  {/* Linked studies section */}
+                  {/* ── Contacts section ── */}
+                  <div className="hosp-contacts-section">
+                    <div className="hosp-contacts-header">
+                      <span className="hosp-contacts-title">👤 Contacts</span>
+                      <button className="btn btn--primary btn--sm" onClick={e => { e.stopPropagation(); addContact(hosp); }}>
+                        + Add Contact
+                      </button>
+                    </div>
+                    {contacts.length === 0
+                      ? <p className="hosp-no-contacts">No contacts yet — click "+ Add Contact" to add one.</p>
+                      : contacts.map(contact => (
+                          <div key={contact.id} className="contact-row">
+                            <div className="contact-info">
+                              <span className="contact-name">
+                                {contact.name || <em className="accord-field-empty">Unnamed</em>}
+                              </span>
+                              {contact.email && (
+                                <div className="contact-email-row">
+                                  <a href={`mailto:${contact.email}`} className="contact-email"
+                                    onClick={e => e.stopPropagation()}>{contact.email}</a>
+                                  <select
+                                    className={`email-status-select email-status-select--${contact.emailStatus === 'Email Sent' ? 'sent' : 'not-sent'}`}
+                                    value={contact.emailStatus || 'Email Not Sent'}
+                                    onClick={e => e.stopPropagation()}
+                                    onChange={e => updateContactField(hosp, contact.id, 'emailStatus', e.target.value)}>
+                                    <option value="Email Not Sent">Email Not Sent</option>
+                                    <option value="Email Sent">Email Sent</option>
+                                  </select>
+                                </div>
+                              )}
+                              {contact.phone && (
+                                <div className="contact-phone-row">
+                                  <span className="contact-phone">{contact.phone}</span>
+                                  <a href={`tel:${contact.phone.replace(/\D/g,'')}`}
+                                    className="contact-call-btn" onClick={e => e.stopPropagation()}>
+                                    📞 Call
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                            <div className="contact-actions">
+                              <button className="contact-edit-btn"
+                                onClick={e => { e.stopPropagation(); setEditingContact({ hospital: hosp, contact, isNew: false }); }}>
+                                ✏️
+                              </button>
+                              <button className="contact-remove-btn"
+                                onClick={e => { e.stopPropagation(); removeContact(hosp, contact.id); }}>
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                    }
+                  </div>
+
+                  {/* ── Linked studies section ── */}
                   <div className="hosp-studies-section">
                     <div className="hosp-studies-header">
                       <span className="hosp-studies-title">🧬 Linked Studies</span>
                       <button className="btn btn--primary btn--sm"
-                        onClick={() => setLinkingHospital(hosp)}>+ Link Study</button>
+                        onClick={e => { e.stopPropagation(); setLinkingHospital(hosp); }}>+ Link Study</button>
                     </div>
                     {linkedTrials.length === 0
                       ? <p className="hosp-no-studies">No studies linked yet — click "+ Link Study" to add.</p>
@@ -422,10 +562,7 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
           );
         })}
 
-        {/* Add hospital button */}
-        <button className="hosp-add-btn" onClick={onAddHospital}>
-          + Add Hospital
-        </button>
+        <button className="hosp-add-btn" onClick={onAddHospital}>+ Add Hospital</button>
       </div>
 
       <div className="list-footer">
@@ -457,6 +594,17 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
               }} />
           </div>
         </div>
+      )}
+
+      {/* Contact edit modal */}
+      {editingContact && (
+        <ContactEditModal
+          contact={editingContact.contact}
+          hospital={editingContact.hospital}
+          isNew={editingContact.isNew}
+          isMobile={isMobile}
+          onSave={draft => saveContact(editingContact.hospital, draft, editingContact.isNew)}
+          onClose={() => setEditingContact(null)} />
       )}
 
       {/* Link study modal */}
