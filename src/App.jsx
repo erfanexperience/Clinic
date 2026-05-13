@@ -268,6 +268,8 @@ export default function App() {
     val ? { ...prev, [key]: val } : Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
   );
 
+  const isCarT = t => t === 'CAR-T Cell Therapy' || t === 'Allogeneic CAR-T';
+
   const filtered = rows
     .filter(row => {
       if (search) {
@@ -277,10 +279,12 @@ export default function App() {
       return Object.entries(filters).every(([k, v]) => row[k] === v);
     })
     .sort((a, b) => {
-      let av = a[sort.key] ?? '', bv = b[sort.key] ?? '';
-      return sort.dir === 'asc'
-        ? av.toString().localeCompare(bv.toString())
-        : bv.toString().localeCompare(av.toString());
+      // CAR-T always first
+      const aCart = isCarT(a.treatmentType) ? 0 : 1;
+      const bCart = isCarT(b.treatmentType) ? 0 : 1;
+      if (aCart !== bCart) return aCart - bCart;
+      // Within each group, sort by trial name
+      return a.trialName.localeCompare(b.trialName);
     });
 
   const contactedCount = rows.filter(r => r.status === 'Contacted' || r.status === 'In Talks').length;
