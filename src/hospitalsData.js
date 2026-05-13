@@ -12,7 +12,11 @@ export const INITIAL_HOSPITALS = [
     website: 'https://health.ucsd.edu',
     contactStatus: 'Not Contacted',
     notes: '',
-    contacts: [],
+    contacts: [
+      { id: 'c-ucsd-1', name: 'Shandel Odom',   email: 'sodom@health.ucsd.edu',   emailStatus: 'Email Not Sent', phone: '858-246-2905' },
+      { id: 'c-ucsd-2', name: 'Gisselle Paez',  email: 'g1paez@health.ucsd.edu',  emailStatus: 'Email Not Sent', phone: '858-246-2905' },
+      { id: 'c-ucsd-3', name: 'Soha Fardad',    email: 'sofardad@health.ucsd.edu', emailStatus: 'Email Not Sent', phone: '858-246-2905' },
+    ],
     linkedStudies: [],
   },
 ];

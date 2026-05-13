@@ -38,6 +38,21 @@ function saveTrials(rows) {
   set(ref(db, TRIALS_PATH), obj);
 }
 
+const INITIAL_HOSP_MAP = Object.fromEntries(INITIAL_HOSPITALS.map(h => [h.id, h]));
+
+function mergeWithInitialHospitals(firebaseHospitals) {
+  return firebaseHospitals.map(hosp => {
+    const seed = INITIAL_HOSP_MAP[hosp.id];
+    if (!seed) return hosp;
+    const merged = { ...hosp };
+    // Seed contacts only if the hospital currently has none
+    if ((!merged.contacts || merged.contacts.length === 0) && seed.contacts?.length > 0) {
+      merged.contacts = seed.contacts;
+    }
+    return merged;
+  });
+}
+
 function saveHospitals(hospitals) {
   const obj = {};
   hospitals.forEach(h => { obj[h.id] = h; });
@@ -733,7 +748,13 @@ export default function App() {
       if (!data) {
         saveHospitals(INITIAL_HOSPITALS); setHospitals(INITIAL_HOSPITALS);
       } else {
-        setHospitals(Object.values(data));
+        const arr = Object.values(data);
+        const merged = mergeWithInitialHospitals(arr);
+        // Check if new hospitals in INITIAL_HOSPITALS are missing from Firebase
+        const savedIds = new Set(merged.map(h => h.id));
+        const newHosps = INITIAL_HOSPITALS.filter(h => !savedIds.has(h.id));
+        const final = newHosps.length ? [...merged, ...newHosps] : merged;
+        saveHospitals(final); setHospitals(final);
       }
       setHospsLoading(false);
     });
