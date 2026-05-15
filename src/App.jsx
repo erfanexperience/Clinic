@@ -386,14 +386,59 @@ function StudiesAccordion({ rows, onEdit, onDelete, isMobile }) {
 }
 
 /* ══════════════════════════════════════════
+   NEW HOSPITAL MODAL
+══════════════════════════════════════════ */
+function NewHospitalModal({ onSave, onClose, isMobile }) {
+  const [draft, setDraft] = useState({ name: '', website: '' });
+  const nameRef = useRef(null);
+  useEffect(() => { setTimeout(() => nameRef.current?.focus(), 60); }, []);
+
+  const canSave = draft.name.trim().length > 0;
+
+  return (
+    <div className="edit-modal-overlay" onClick={onClose}>
+      <div className={`edit-modal ${isMobile ? 'edit-modal--bottom' : 'edit-modal--center'}`}
+        onClick={e => e.stopPropagation()}>
+        <div className="edit-modal-header">
+          <button className="edit-modal-btn edit-modal-btn--cancel" onClick={onClose}>Cancel</button>
+          <span className="edit-modal-title">New Hospital</span>
+          <button className="edit-modal-btn edit-modal-btn--save"
+            style={{ opacity: canSave ? 1 : .4, cursor: canSave ? 'pointer' : 'default' }}
+            onClick={() => canSave && onSave(draft)}>Add</button>
+        </div>
+        <div className="edit-modal-body">
+          <div className="contact-form">
+            <label className="contact-form-label">Hospital Name *</label>
+            <input ref={nameRef} className="edit-input" value={draft.name}
+              onChange={e => setDraft(p => ({ ...p, name: e.target.value }))}
+              placeholder="Enter hospital name…"
+              onKeyDown={e => e.key === 'Enter' && canSave && onSave(draft)} />
+            <label className="contact-form-label">Website</label>
+            <input className="edit-input" type="url" value={draft.website}
+              onChange={e => setDraft(p => ({ ...p, website: e.target.value }))}
+              placeholder="https://…" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
    HOSPITALS TAB
 ══════════════════════════════════════════ */
-function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, onDeleteHospital, isMobile }) {
+function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, onDeleteHospital, isMobile, newHospTrigger }) {
   const [expandedId, setExpandedId] = useState(null);
   const [editingHospital, setEditingHospital] = useState(null);
   const [linkingHospital, setLinkingHospital] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editingContact, setEditingContact] = useState(null); // { hospital, contact, isNew }
+  const [showCreate, setShowCreate] = useState(false);
+
+  // Header "+" button signals HospitalsTab to open create modal
+  useEffect(() => {
+    if (newHospTrigger > 0) setShowCreate(true);
+  }, [newHospTrigger]);
 
   const handleSaveField = (hospital, key, value) => {
     onUpdateHospital({ ...hospital, [key]: value });
@@ -577,12 +622,32 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
           );
         })}
 
-        <button className="hosp-add-btn" onClick={onAddHospital}>+ Add Hospital</button>
+        <button className="hosp-add-btn" onClick={() => setShowCreate(true)}>+ Add Hospital</button>
       </div>
 
       <div className="list-footer">
         <span>{hospitals.length} hospital{hospitals.length !== 1 ? 's' : ''}</span>
       </div>
+
+      {/* Create new hospital modal */}
+      {showCreate && (
+        <NewHospitalModal
+          isMobile={isMobile}
+          onSave={(data) => {
+            const h = {
+              id: `hosp-${Date.now()}`,
+              contactStatus: 'Not Contacted',
+              notes: '',
+              contacts: [],
+              linkedStudies: [],
+              ...data,
+            };
+            onAddHospital(h);
+            setExpandedId(h.id);
+            setShowCreate(false);
+          }}
+          onClose={() => setShowCreate(false)} />
+      )}
 
       {/* Edit hospital field modal */}
       {editingHospital && (
@@ -718,8 +783,9 @@ export default function App() {
   const [showSearch, setShowSearch]   = useState(false);
 
   // Hospitals state
-  const [hospitals, setHospitals]   = useState([]);
+  const [hospitals, setHospitals]     = useState([]);
   const [hospsLoading, setHospsLoading] = useState(true);
+  const [newHospTrigger, setNewHospTrigger] = useState(0);
 
   /* ── Firebase: trials ── */
   useEffect(() => {
@@ -791,9 +857,7 @@ export default function App() {
     });
   }, []);
 
-  const addHospital = () => {
-    const h = { id: `hosp-${Date.now()}`, name: '', address: '', phone: '', email: '',
-      website: '', contactStatus: 'Not Contacted', notes: '', linkedStudies: [] };
+  const addHospital = (h) => {
     const next = [...hospitals, h];
     setHospitals(next); saveHospitals(next);
   };
@@ -858,14 +922,14 @@ export default function App() {
           {isMobile ? (
             <>
               <button className="btn btn--icon" onClick={() => setShowSearch(s => !s)}>🔍</button>
-              <button className="btn btn--primary" onClick={activeTab === 'studies' ? addTrial : addHospital}>＋</button>
+              <button className="btn btn--primary" onClick={activeTab === 'studies' ? addTrial : () => setNewHospTrigger(t => t + 1)}>＋</button>
             </>
           ) : (
             <>
               {activeTab === 'studies' && (
                 <button className="btn btn--ghost" onClick={() => exportCSV(filtered)}>↓ CSV</button>
               )}
-              <button className="btn btn--primary" onClick={activeTab === 'studies' ? addTrial : addHospital}>
+              <button className="btn btn--primary" onClick={activeTab === 'studies' ? addTrial : () => setNewHospTrigger(t => t + 1)}>
                 + {activeTab === 'studies' ? 'Add Trial' : 'Add Hospital'}
               </button>
             </>
@@ -978,7 +1042,8 @@ export default function App() {
           isMobile={isMobile}
           onUpdateHospital={updateHospital}
           onAddHospital={addHospital}
-          onDeleteHospital={deleteHospital} />
+          onDeleteHospital={deleteHospital}
+          newHospTrigger={newHospTrigger} />
       )}
     </div>
   );

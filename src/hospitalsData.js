@@ -19,4 +19,15 @@ export const INITIAL_HOSPITALS = [
     ],
     linkedStudies: [],
   },
+  {
+    id: 'hosp-unmc',
+    name: 'University of Nebraska Medical Center',
+    website: '',
+    contactStatus: 'Not Contacted',
+    notes: '',
+    contacts: [
+      { id: 'c-unmc-1', name: 'Dr. Rana K. Zabad, MD', email: '', emailStatus: 'Email Not Sent', phone: '(402) 559-8600' },
+    ],
+    linkedStudies: [],
+  },
 ];
