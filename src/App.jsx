@@ -330,13 +330,13 @@ function StudiesAccordion({ rows, onEdit, onDelete, isMobile }) {
       {rows.map((row, idx) => {
         const isOpen = expandedId === row.id;
         return (
-          <div key={row.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''}`}>
+          <div key={row.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${row.status === 'Cancelled' ? 'accord-card--cancelled' : ''}`}>
             <button className="accord-header" onClick={() => setExpandedId(isOpen ? null : row.id)}>
               <span className="accord-num">{idx + 1}</span>
               <span className="accord-name">{row.trialName || <em>Untitled</em>}</span>
               <div className="accord-badges">
                 {row.status        && <Badge value={row.status}        type="status" />}
-                {row.treatmentType && <Badge value={row.treatmentType} type="treatmentType" />}
+                {row.treatmentType && !isMobile && <Badge value={row.treatmentType} type="treatmentType" />}
                 {row.msTypeEligible && !isMobile && <Badge value={row.msTypeEligible} type="msTypeEligible" />}
               </div>
               <span className="accord-chevron">{isOpen ? '▲' : '▼'}</span>
@@ -437,7 +437,7 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
           const linkedTrials = allTrials.filter(t => (hosp.linkedStudies || []).includes(t.id));
           const contacts = hosp.contacts || [];
           return (
-            <div key={hosp.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''}`}>
+            <div key={hosp.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${hosp.contactStatus === 'Cancelled' ? 'accord-card--cancelled' : ''}`}>
               {/* Collapsed header */}
               <button className="accord-header" onClick={() => setExpandedId(isOpen ? null : hosp.id)}>
                 <span className="accord-num">🏥</span>

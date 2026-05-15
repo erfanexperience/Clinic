@@ -772,6 +772,19 @@ td.col-actions {
   box-shadow: 0 0 0 2px rgba(79,135,245,.18), var(--shadow-md);
 }
 
+/* ── Cancelled card — light red tint ── */
+.accord-card--cancelled {
+  border-color: #fca5a5;
+  background: #fff8f8;
+}
+.accord-card--cancelled .accord-header         { background: #fff3f3; }
+.accord-card--cancelled .accord-header:hover   { background: #fee2e2; }
+.accord-card--cancelled .accord-header:active  { background: #fecaca; }
+.accord-card--cancelled.accord-card--open      { border-color: #f87171; box-shadow: 0 0 0 2px rgba(239,68,68,.15), var(--shadow-md); }
+.accord-card--cancelled.accord-card--open .accord-header { background: #fff0f0; }
+.accord-card--cancelled .accord-num            { background: #fecaca; color: #b91c1c; }
+.accord-card--cancelled.accord-card--open .accord-num { background: #f87171; color: #fff; }
+
 /* ── Collapsed header ── */
 .accord-header {
   width: 100%;
@@ -1463,7 +1476,8 @@ td.col-actions {
   .accord-field-label { width: 100px; }
   .accord-header { padding: 13px 14px; gap: 10px; }
   .accord-name { font-size: 14px; }
-  .accord-badges { display: none; } /* keep header compact */
+  .accord-badges { gap: 4px; }
+  .accord-badges .badge { font-size: 10px; padding: 1px 6px; }
   .accord-field-edit { opacity: .3; }
 
   .edit-modal-overlay { align-items: flex-end; }
