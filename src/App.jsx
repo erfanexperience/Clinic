@@ -3,6 +3,16 @@ import { ref, set, onValue } from 'firebase/database';
 import { db } from './firebase';
 import { COLUMNS, SELECT_OPTIONS, BADGE_COLORS, INITIAL_DATA } from './data';
 import { HOSPITAL_FIELDS, INITIAL_HOSPITALS } from './hospitalsData';
+import {
+  DndContext, closestCenter,
+  KeyboardSensor, PointerSensor, TouchSensor,
+  useSensor, useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext, verticalListSortingStrategy,
+  sortableKeyboardCoordinates, useSortable, arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import './App.css';
 
 /* ══════════════════════════════════════════
@@ -323,24 +333,38 @@ function ContactEditModal({ contact, hospital, isNew, onSave, onClose, isMobile 
 /* ══════════════════════════════════════════
    STUDIES TAB — Accordion
 ══════════════════════════════════════════ */
-function StudiesAccordion({ rows, onEdit, onDelete, isMobile }) {
+function StudiesAccordion({ rows, onEdit, onDelete, onReorder, isMobile }) {
   const [expandedId, setExpandedId] = useState(null);
+  const sensors = useDndSensors();
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const oldIdx = rows.findIndex(r => r.id === active.id);
+    const newIdx = rows.findIndex(r => r.id === over.id);
+    onReorder(arrayMove(rows, oldIdx, newIdx));
+  };
+
   return (
-    <div className="accordion-list">
-      {rows.map((row, idx) => {
-        const isOpen = expandedId === row.id;
-        return (
-          <div key={row.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${row.status === 'Cancelled' ? 'accord-card--cancelled' : ''}`}>
-            <button className="accord-header" onClick={() => setExpandedId(isOpen ? null : row.id)}>
-              <span className="accord-num">{idx + 1}</span>
-              <span className="accord-name">{row.trialName || <em>Untitled</em>}</span>
-              <div className="accord-badges">
-                {row.status        && <Badge value={row.status}        type="status" />}
-                {row.treatmentType && !isMobile && <Badge value={row.treatmentType} type="treatmentType" />}
-                {row.msTypeEligible && !isMobile && <Badge value={row.msTypeEligible} type="msTypeEligible" />}
-              </div>
-              <span className="accord-chevron">{isOpen ? '▲' : '▼'}</span>
-            </button>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={rows.map(r => r.id)} strategy={verticalListSortingStrategy}>
+        <div className="accordion-list">
+          {rows.map((row, idx) => {
+            const isOpen = expandedId === row.id;
+            return (
+              <SortableCard key={row.id} id={row.id}>
+                {({ isDragging, dragHandleRef, dragHandleProps }) => (
+                  <div className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${row.status === 'Cancelled' ? 'accord-card--cancelled' : ''} ${isDragging ? 'accord-card--dragging' : ''}`}>
+                    <button className="accord-header" onClick={() => !isDragging && setExpandedId(isOpen ? null : row.id)}>
+                      <span ref={dragHandleRef} className="drag-handle" {...dragHandleProps}>⠿</span>
+                      <span className="accord-num">{idx + 1}</span>
+                      <span className="accord-name">{row.trialName || <em>Untitled</em>}</span>
+                      <div className="accord-badges">
+                        {row.status        && <Badge value={row.status}        type="status" />}
+                        {row.treatmentType && !isMobile && <Badge value={row.treatmentType} type="treatmentType" />}
+                        {row.msTypeEligible && !isMobile && <Badge value={row.msTypeEligible} type="msTypeEligible" />}
+                      </div>
+                      <span className="accord-chevron">{isOpen ? '▲' : '▼'}</span>
+                    </button>
             {isOpen && (
               <div className="accord-body">
                 <div className="accord-fields">
@@ -379,9 +403,13 @@ function StudiesAccordion({ rows, onEdit, onDelete, isMobile }) {
               </div>
             )}
           </div>
-        );
-      })}
-    </div>
+                )}
+              </SortableCard>
+            );
+          })}
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 }
 
@@ -427,7 +455,7 @@ function NewHospitalModal({ onSave, onClose, isMobile }) {
 /* ══════════════════════════════════════════
    HOSPITALS TAB
 ══════════════════════════════════════════ */
-function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, onDeleteHospital, isMobile, newHospTrigger }) {
+function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, onDeleteHospital, onReorderHospitals, isMobile, newHospTrigger }) {
   const [expandedId, setExpandedId] = useState(null);
   const [editingHospital, setEditingHospital] = useState(null);
   const [linkingHospital, setLinkingHospital] = useState(null);
@@ -474,30 +502,44 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
     onUpdateHospital({ ...hosp, contacts });
   };
 
+  const sensors = useDndSensors();
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const oldIdx = hospitals.findIndex(h => h.id === active.id);
+    const newIdx = hospitals.findIndex(h => h.id === over.id);
+    onReorderHospitals(arrayMove(hospitals, oldIdx, newIdx));
+  };
+
   return (
     <div className="list-container">
-      <div className="accordion-list">
-        {hospitals.map((hosp) => {
-          const isOpen = expandedId === hosp.id;
-          const linkedTrials = allTrials.filter(t => (hosp.linkedStudies || []).includes(t.id));
-          const contacts = hosp.contacts || [];
-          return (
-            <div key={hosp.id} className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${hosp.contactStatus === 'Cancelled' ? 'accord-card--cancelled' : ''}`}>
-              {/* Collapsed header */}
-              <button className="accord-header" onClick={() => setExpandedId(isOpen ? null : hosp.id)}>
-                <span className="accord-num">🏥</span>
-                <span className="accord-name">{hosp.name || <em>Unnamed Hospital</em>}</span>
-                <div className="accord-badges">
-                  {hosp.contactStatus && <Badge value={hosp.contactStatus} type="status" />}
-                  {contacts.length > 0 && (
-                    <span className="hosp-contact-count">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</span>
-                  )}
-                  {linkedTrials.length > 0 && (
-                    <span className="hosp-study-count">{linkedTrials.length} stud{linkedTrials.length === 1 ? 'y' : 'ies'}</span>
-                  )}
-                </div>
-                <span className="accord-chevron">{isOpen ? '▲' : '▼'}</span>
-              </button>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={hospitals.map(h => h.id)} strategy={verticalListSortingStrategy}>
+          <div className="accordion-list">
+            {hospitals.map((hosp) => {
+              const isOpen = expandedId === hosp.id;
+              const linkedTrials = allTrials.filter(t => (hosp.linkedStudies || []).includes(t.id));
+              const contacts = hosp.contacts || [];
+              return (
+                <SortableCard key={hosp.id} id={hosp.id}>
+                  {({ isDragging, dragHandleRef, dragHandleProps }) => (
+                    <div className={`accord-card ${isOpen ? 'accord-card--open' : ''} ${hosp.contactStatus === 'Cancelled' ? 'accord-card--cancelled' : ''} ${isDragging ? 'accord-card--dragging' : ''}`}>
+                      {/* Collapsed header */}
+                      <button className="accord-header" onClick={() => !isDragging && setExpandedId(isOpen ? null : hosp.id)}>
+                        <span ref={dragHandleRef} className="drag-handle" {...dragHandleProps}>⠿</span>
+                        <span className="accord-num">🏥</span>
+                        <span className="accord-name">{hosp.name || <em>Unnamed Hospital</em>}</span>
+                        <div className="accord-badges">
+                          {hosp.contactStatus && <Badge value={hosp.contactStatus} type="status" />}
+                          {contacts.length > 0 && (
+                            <span className="hosp-contact-count">{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</span>
+                          )}
+                          {linkedTrials.length > 0 && (
+                            <span className="hosp-study-count">{linkedTrials.length} stud{linkedTrials.length === 1 ? 'y' : 'ies'}</span>
+                          )}
+                        </div>
+                        <span className="accord-chevron">{isOpen ? '▲' : '▼'}</span>
+                      </button>
 
               {/* Expanded */}
               {isOpen && (
@@ -619,11 +661,15 @@ function HospitalsTab({ hospitals, allTrials, onUpdateHospital, onAddHospital, o
                 </div>
               )}
             </div>
-          );
-        })}
+                  )}
+                </SortableCard>
+              );
+            })}
 
-        <button className="hosp-add-btn" onClick={() => setShowCreate(true)}>+ Add Hospital</button>
-      </div>
+            <button className="hosp-add-btn" onClick={() => setShowCreate(true)}>+ Add Hospital</button>
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <div className="list-footer">
         <span>{hospitals.length} hospital{hospitals.length !== 1 ? 's' : ''}</span>
@@ -767,6 +813,38 @@ function HospFieldEditor({ field, value, onChange, onQuickSave }) {
 }
 
 /* ══════════════════════════════════════════
+   SORTABLE CARD WRAPPER (shared by both tabs)
+══════════════════════════════════════════ */
+function SortableCard({ id, children }) {
+  const {
+    attributes, listeners,
+    setNodeRef, setActivatorNodeRef,
+    transform, transition, isDragging,
+  } = useSortable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 999 : 'auto' }}
+      className={isDragging ? 'accord-card-dragging-wrapper' : ''}>
+      {children({
+        isDragging,
+        dragHandleRef: setActivatorNodeRef,
+        dragHandleProps: { ...attributes, ...listeners },
+      })}
+    </div>
+  );
+}
+
+function useDndSensors() {
+  return useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+}
+
+/* ══════════════════════════════════════════
    MAIN APP
 ══════════════════════════════════════════ */
 export default function App() {
@@ -793,13 +871,23 @@ export default function App() {
     return onValue(trialsRef, snapshot => {
       const data = snapshot.val();
       if (!data) {
-        saveTrials(INITIAL_DATA); setRows(INITIAL_DATA);
+        const withOrder = INITIAL_DATA.map((r, i) => ({ ...r, order: i }));
+        saveTrials(withOrder); setRows(withOrder);
       } else {
         const arr = migrateRows(Object.values(data));
         const withUpdates = mergeWithInitial(arr);
         const savedNcts = new Set(withUpdates.map(r => r.nctNumber).filter(Boolean));
         const newTrials = INITIAL_DATA.filter(r => r.nctNumber && !savedNcts.has(r.nctNumber));
-        const final = newTrials.length ? [...withUpdates, ...newTrials] : withUpdates;
+        let final = newTrials.length ? [...withUpdates, ...newTrials] : withUpdates;
+        // Assign order field on first load (CAR-T first, then alpha)
+        if (final.some(r => r.order === undefined || r.order === null)) {
+          const _isCarT = t => t === 'CAR-T Cell Therapy' || t === 'Allogeneic CAR-T';
+          final = [...final].sort((a, b) => {
+            const ac = _isCarT(a.treatmentType) ? 0 : 1, bc = _isCarT(b.treatmentType) ? 0 : 1;
+            if (ac !== bc) return ac - bc;
+            return (a.trialName || '').localeCompare(b.trialName || '');
+          }).map((r, i) => ({ ...r, order: r.order ?? i }));
+        }
         saveTrials(final); setRows(final);
       }
       setTrialsLoading(false);
@@ -812,14 +900,19 @@ export default function App() {
     return onValue(hospsRef, snapshot => {
       const data = snapshot.val();
       if (!data) {
-        saveHospitals(INITIAL_HOSPITALS); setHospitals(INITIAL_HOSPITALS);
+        const withOrder = INITIAL_HOSPITALS.map((h, i) => ({ ...h, order: i }));
+        saveHospitals(withOrder); setHospitals(withOrder);
       } else {
         const arr = Object.values(data);
         const merged = mergeWithInitialHospitals(arr);
         // Check if new hospitals in INITIAL_HOSPITALS are missing from Firebase
         const savedIds = new Set(merged.map(h => h.id));
         const newHosps = INITIAL_HOSPITALS.filter(h => !savedIds.has(h.id));
-        const final = newHosps.length ? [...merged, ...newHosps] : merged;
+        let final = newHosps.length ? [...merged, ...newHosps] : merged;
+        // Assign order if missing
+        if (final.some(h => h.order === undefined || h.order === null)) {
+          final = final.map((h, i) => ({ ...h, order: h.order ?? i }));
+        }
         saveHospitals(final); setHospitals(final);
       }
       setHospsLoading(false);
@@ -858,17 +951,28 @@ export default function App() {
   }, []);
 
   const addHospital = (h) => {
-    const next = [...hospitals, h];
+    const next = [...hospitals, h].map((hosp, i) => ({ ...hosp, order: hosp.order ?? i }));
     setHospitals(next); saveHospitals(next);
   };
+
+  const reorderTrials = useCallback((newRows) => {
+    const withOrder = newRows.map((r, i) => ({ ...r, order: i }));
+    setRows(withOrder);
+    saveTrials(withOrder);
+  }, []);
+
+  const reorderHospitals = useCallback((newHosps) => {
+    const withOrder = newHosps.map((h, i) => ({ ...h, order: i }));
+    setHospitals(withOrder);
+    saveHospitals(withOrder);
+  }, []);
 
   const deleteHospital = id => {
     const next = hospitals.filter(h => h.id !== id);
     setHospitals(next); saveHospitals(next);
   };
 
-  /* ── Filtered/sorted trials ── */
-  const isCarT = t => t === 'CAR-T Cell Therapy' || t === 'Allogeneic CAR-T';
+  /* ── Filtered/sorted trials (ordered by user-defined drag order) ── */
   const filtered = rows
     .filter(row => {
       if (search) {
@@ -877,11 +981,10 @@ export default function App() {
       }
       return Object.entries(filters).every(([k, v]) => row[k] === v);
     })
-    .sort((a, b) => {
-      const ac = isCarT(a.treatmentType) ? 0 : 1, bc = isCarT(b.treatmentType) ? 0 : 1;
-      if (ac !== bc) return ac - bc;
-      return a.trialName.localeCompare(b.trialName);
-    });
+    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
+
+  /* Hospitals sorted by user-defined drag order */
+  const sortedHospitals = [...hospitals].sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
 
   const setFilter = (key, val) => setFilters(prev =>
     val ? { ...prev, [key]: val } : Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
@@ -987,7 +1090,8 @@ export default function App() {
               ? <div className="empty-state">No trials match your search.</div>
               : <StudiesAccordion rows={filtered} isMobile={isMobile}
                   onEdit={(row, col) => setEditModal({ row, col })}
-                  onDelete={id => setConfirmDelete(id)} />
+                  onDelete={id => setConfirmDelete(id)}
+                  onReorder={reorderTrials} />
             }
             <div className="list-footer">
               <span>{filtered.length} of {rows.length} trials</span>
@@ -1037,12 +1141,13 @@ export default function App() {
       {/* ── Hospitals tab ── */}
       {activeTab === 'hospitals' && (
         <HospitalsTab
-          hospitals={hospitals}
+          hospitals={sortedHospitals}
           allTrials={rows}
           isMobile={isMobile}
           onUpdateHospital={updateHospital}
           onAddHospital={addHospital}
           onDeleteHospital={deleteHospital}
+          onReorderHospitals={reorderHospitals}
           newHospTrigger={newHospTrigger} />
       )}
     </div>

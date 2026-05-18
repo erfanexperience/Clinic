@@ -772,6 +772,31 @@ td.col-actions {
   box-shadow: 0 0 0 2px rgba(79,135,245,.18), var(--shadow-md);
 }
 
+/* ── Drag handle ── */
+.drag-handle {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: #cbd5e1;
+  cursor: grab;
+  padding: 2px 4px;
+  border-radius: 4px;
+  touch-action: none;
+  line-height: 1;
+  transition: color .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.drag-handle:hover  { color: #94a3b8; }
+.drag-handle:active { cursor: grabbing; color: #64748b; }
+
+/* Card while being dragged */
+.accord-card--dragging {
+  opacity: 0.45;
+  box-shadow: var(--shadow-md);
+}
+.accord-card-dragging-wrapper {
+  z-index: 999;
+}
+
 /* ── Cancelled card — light red tint ── */
 .accord-card--cancelled {
   border-color: #fca5a5;
