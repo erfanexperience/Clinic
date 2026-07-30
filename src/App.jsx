@@ -891,6 +891,11 @@ export default function App() {
         saveTrials(final); setRows(final);
       }
       setTrialsLoading(false);
+    }, error => {
+      console.error('Firebase trials error:', error);
+      const withOrder = INITIAL_DATA.map((r, i) => ({ ...r, order: i }));
+      setRows(withOrder);
+      setTrialsLoading(false);
     });
   }, []);
 
@@ -915,6 +920,11 @@ export default function App() {
         }
         saveHospitals(final); setHospitals(final);
       }
+      setHospsLoading(false);
+    }, error => {
+      console.error('Firebase hospitals error:', error);
+      const withOrder = INITIAL_HOSPITALS.map((h, i) => ({ ...h, order: i }));
+      setHospitals(withOrder);
       setHospsLoading(false);
     });
   }, []);
